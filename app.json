@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "kaizen-ride",
+    "slug": "kaizen-ride",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vanvince.kaizen-ride"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.vanvince.kaizenride",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCfARqjJgmhmIp2XDWlYnvv63x0rxvLFsA"
+        }
+      },
+      "versionCode": 1
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "fa4cb6c4-700e-42d1-893e-5ad9415ee3e3"
+      }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(kaizen-ride) to use your location."
+        }
+      ]
+    ]
+
+
+  }
+}
