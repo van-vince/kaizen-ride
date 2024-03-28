@@ -24,6 +24,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.vanvince.kaizenride",
+      "googleServicesFile": "./google-services.json",
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyCfARqjJgmhmIp2XDWlYnvv63x0rxvLFsA"

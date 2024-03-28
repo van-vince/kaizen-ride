@@ -7,27 +7,61 @@ import {
   Dimensions,
   Modal,
 } from "react-native";
+import Feather from "react-native-vector-icons/Feather";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 
-const OrderPopup = ({ newOrder, onAccept, onDecline, duration, distance }) => {
-  // const navigation = useNavigation()
-
-  const [modalVisible, setModalVisible] = useState(false);
-
+const OrderPopup = ({ onPress, visible }) => {
   return (
     <View style={styles.root}>
-      <Modal visible={modalVisible} animationType="fade" transparent={true}>
-        <View style={styles.centeredView}>
+      <Modal visible={visible} animationType="fade" transparent={true}>
+        <View>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Hello World!</Text>
+            <View
+              style={{
+                backgroundColor: "white",
+                marginBottom: 10,
+                height: 60,
+                width: "100%",
+              }}
+            >
+              <Text
+                style={{
+                  margin: 10,
+                  textAlign: "center",
+                  fontWeight: "bold",
+                  fontSize: 18,
+                }}
+              >
+                You've got a new order
+              </Text>
+            </View>
+            <View
+              style={{
+                backgroundColor: "white",
+                items: 'center',
+                alignItems: "center",
+                justifyContent: "center",
+                height: 200,
+                width: 200,
+                marginLeft: '20%',
+                borderRadius: 200,
+              }}
+            >
+              <Feather
+                type="material-community"
+                name="alert-triangle"
+                color='orange'
+                size={100}
+              />
+            </View>
             <Pressable
               style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}
+              onPress={onPress}
             >
-              <Text style={styles.textStyle}>Hide Modal</Text>
+              <Text style={styles.textStyle}>Tap for details</Text>
             </Pressable>
           </View>
         </View>
@@ -50,41 +84,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#00000010",
     zIndex: 99,
   },
-  popupContainer: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    height: "90%",
-    alignItems: "center",
-    justifyContent: "space-around",
-    backgroundColor: "#40B5AD",
-    zIndex: 99,
-  },
-  centeredView: {
-    flex: 1,
-    // justifyContent: 'center',
-    // alignItems: 'center',
-    // marginTop: 22,
-  },
   modalView: {
-    // margin: 10,
-    backgroundColor: "#00BFFF",
+    backgroundColor: "50C878",
     height: "100%",
-    borderRadius: 10,
-    padding: 35,
-    // alignItems: 'center',
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    flexDirection: "column",
+    justifyContent: "space-between",
+    // padding: 10,
   },
   button: {
     borderRadius: 20,
-    padding: 10,
+    padding: 20,
     elevation: 2,
+    marginVertical: 50,
+    marginHorizontal: 20,
   },
   buttonOpen: {
     backgroundColor: "#F194FF",

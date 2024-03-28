@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "555579445134",
+    "project_id": "kaizen-ride",
+    "storage_bucket": "kaizen-ride.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:555579445134:android:14eb807725d75af96f1edf",
+        "android_client_info": {
+          "package_name": "com.vanvince.kaizenride"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUzjQu8ixv1XTrWy2cCvsxdy15x6L2YZg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

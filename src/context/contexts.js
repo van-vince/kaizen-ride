@@ -99,6 +99,7 @@ export const AuthProvider = ({ children }) => {
         if(res?.data.success ===true){
             let userInfo = res?.data;
             setUserInfo(userInfo);
+            console.log(userInfo)
             setUserToken(userInfo?.courierToken);
             await SecureStore.setItemAsync("userInfo", JSON.stringify(userInfo));
             await SecureStore.setItemAsync("userToken", JSON.stringify(userInfo.courierToken));
@@ -157,17 +158,18 @@ export const AuthProvider = ({ children }) => {
 };
 
 
-// export const OrderContextProvider = ({children}) => {
-//   const [orders, dispatchOrders] = useReducer(OrdersReducer, {
-//     orders: null,
-//   });
+export const OrderContextProvider = ({children}) => {
+  const [orders, dispatchOrders] = useReducer(OrdersReducer, {
+    orders: null,
+  });
 
-//   return (
-//     <OrderContext.Provider value={{orders, dispatchOrders}} >
-//       {children}
-//     </OrderContext.Provider>
-//   )
-// }
+  return (
+    <OrderContext.Provider value={{orders, dispatchOrders}} >
+      {children}
+    </OrderContext.Provider>
+  )
+}
+
 // export const ChargeContextProvider = ({children}) => {
 //   const [charges, dispatchCharges] = useReducer(ChargeReducer, {
 //     charge: null,
