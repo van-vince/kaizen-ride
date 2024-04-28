@@ -6,6 +6,7 @@ import EarningsScreen from '../screens/EarningsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Octicons from "@expo/vector-icons/Octicons";
 import Entypo from "react-native-vector-icons/Entypo";
 import { HomeStack } from './StackNavigator';
 
@@ -42,11 +43,11 @@ const TabNavigator = () => {
       }}
     />
     <Tab.Screen 
-      name="Earnings" 
+      name="History" 
       component={EarningsScreen} 
       options = {{
         tabBarIcon: ({ color, size }) => (
-          <Ionicons name="wallet-outline" color={color} size={size} />
+          <Octicons name="history" color={color} size={size} />
         ),
       }}
     />

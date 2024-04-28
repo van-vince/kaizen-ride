@@ -46,6 +46,17 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(kaizen-ride) to use your location."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          // "icon": "./local/assets/notification-icon.png",
+          "color": "#ffffff",
+          "sounds": [
+            "./assets/ambient.mp3",
+            "./assets/action.mp3"
+          ]
+        }
       ]
     ]
 

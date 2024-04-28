@@ -39,19 +39,16 @@ export default function OrdersScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
 
 
-  const { userInfo } = useContext(AuthContext);
-  const courier = userInfo?.courier;
+  // const { userInfo } = useContext(AuthContext);
+  // const courier = userInfo?.courier;
   // console.log(courier)
-  const id = courier?._id;
+  // const id = courier?._id;
 
   const { orders } = useContext(OrderContext);
-  const order = orders.orders;
+  const order = orders?.orders || []
   // console.log(order)
-
-
-
-  const newOrders = [...order].sort((a, b) => b.id - a.id)
-  console.log(newOrders)
+  const newOrders = [...order].sort((a, b) => b.id - a.id) || []
+  // console.log(newOrders)
 
   
 
@@ -141,9 +138,10 @@ export default function OrdersScreen({ navigation }) {
 async function schedulePushNotification() {
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: "You've got mail! 📬",
-      body: 'Here is the notification body',
-      data: { data: 'goes here' },
+      title: "You've got order! 📬",
+      body: 'order detalils will be shown here',
+      sound: 'call-to-attention.mp3',
+      data: { data: {name: 'vincent', sur: 'amanor'}},
     },
     trigger: null,
   });

@@ -1,21 +1,29 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import React, { useCallback, useMemo, useRef } from "react";
+import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { colors } from "../global/styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import ConfirmPickupPopup from "../components/ConfirmPickupPopup";
 
 const TopickupScreen = ({ navigation, route }) => {
-  const snapPoints = useMemo(() => ["45%", "75%"], []);
+  const snapPoints = useMemo(() => ["50%", "75%"], []);
   const handleSheetChange = useCallback((index) => {}, []);
   const bottomSheetRef = useRef();
 
+  const [modalVisible, setModalVisible] = useState(false);
+
   return (
     <View style={styles.container}>
+      <ConfirmPickupPopup
+        onPress={""}
+        visible={modalVisible}
+        close={() => setModalVisible(!modalVisible)}
+      />
       <View>
         <MapView
-          style={{ height: 500 }}
+          style={{ height: 700 }}
           provider={PROVIDER_GOOGLE}
           showsUserLocation={true}
           followsUserLocation={true}
@@ -40,10 +48,13 @@ const TopickupScreen = ({ navigation, route }) => {
             marginHorizontal: 25,
             marginBottom: 15,
             flexDirection: "row",
-            justifyContent: "space-between",
+            // justifyContent: "space-around",
             alignItems: "center",
           }}
         >
+          <Text style={{fontSize: 16, backgroundColor: 'blue', padding:5, borderRadius: 60, width:40, textAlign: 'center', color: 'white', marginRight: 5 }}>
+            P
+          </Text>
           <Text style={{ color: colors.grey2, fontSize: 16 }}>
             To pick-up point
           </Text>
@@ -80,7 +91,7 @@ const TopickupScreen = ({ navigation, route }) => {
               padding: 15,
               flexDirection: "row",
               justifyContent: "space-between",
-              width: '90%'
+              width: "90%",
             }}
           >
             <Ionicons
@@ -90,16 +101,17 @@ const TopickupScreen = ({ navigation, route }) => {
             />
             <Text
               style={{ fontSize: 16, color: colors.grey2, textAlign: "center" }}
+              onPress={() => setModalVisible(true)}
             >
               Graceland Shito
             </Text>
-            <View style={{ flexDirection: "row"}}>
-              <Text style={{marginHorizontal:5, fontWeight:'bold'}}>1</Text>
+            <View style={{ flexDirection: "row" }}>
+              <Text style={{ marginHorizontal: 5, fontWeight: "bold" }}>1</Text>
               <Ionicons name="chevron-forward" color={colors.grey1} size={20} />
             </View>
           </View>
         </View>
-        <Pressable
+        <TouchableOpacity
           style={{
             borderRadius: 20,
             padding: 15,
@@ -107,14 +119,15 @@ const TopickupScreen = ({ navigation, route }) => {
             marginHorizontal: 20,
             backgroundColor: "#2196F3",
           }}
-          onPress={() => navigation.navigate("ConfirmPickupScreen")}
+          // onPress={() => navigation.navigate("ConfirmPickupScreen")}
+          onPress={() => setModalVisible(true)}
         >
           <Text
             style={{ color: "white", fontWeight: "bold", textAlign: "center" }}
           >
             I have arived at pick-up point
           </Text>
-        </Pressable>
+        </TouchableOpacity>
       </BottomSheet>
     </View>
   );

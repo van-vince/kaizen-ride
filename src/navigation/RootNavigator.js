@@ -10,22 +10,15 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { io } from "socket.io-client";
-import { useNavigation } from '@react-navigation/native'
+import { navigationRef, navigate } from './OutNavigation';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
-    shouldSetBadge: false,
+    shouldSetBadge: true,
   }),
 });
-
-export const navigationRef = React.createRef();
-
-export function navigate(name, params) {
-  navigationRef.current?.navigate(name, params);
-}
-
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -48,7 +41,7 @@ const RootNavigator = () => {
   const { userInfo } = useContext(AuthContext);
   const courier = userInfo?.courier
   const id = courier?._id;
-  // console.log((courier))
+  // console.log('orders', currentOrders)
 
   const { dispatchOrders } = useContext(OrderContext);
 
@@ -61,7 +54,7 @@ const RootNavigator = () => {
         dispatchOrders({ type: "ADD_ORDERS", payload: { orders: res.data.allOrders } });
       })
       .catch((err) => {
-        console.log(err);
+        console.log('orders', err);
       });
   };
 
@@ -69,8 +62,6 @@ const RootNavigator = () => {
   orders()
   }, [currentOrders])
   
-  // const lenght = currentOrders.length
-  // console.log(lenght) 
 
   // Expo notifications
   const [expoPushToken, setExpoPushToken] = useState('');
@@ -82,11 +73,13 @@ const RootNavigator = () => {
     registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
 
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      setNotification(notification);
-    });
+      setNotification(notification?.request?.content.data);
+      // console.log( 'note', notification?.request?.content.data)
+    })
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
+      setNotification(notification);
+      // console.log(response);
     });
 
     return () => {
@@ -121,21 +114,24 @@ const registerPushToken = async ()=> {
 
 
   // Connect to Socket.io
-  const socket = io();
-  const [message, setMessage] = useState()
+  // const socket = io();
+  // const [message, setMessage] = useState()
 
+  // socket.current = io('https://e457-102-176-65-192.ngrok-free.app');
+    
+  // useEffect(() => {
+  //     socket.current.emit("new-user-add", id);
+  //     socket.current.on("get-users", (activeUsers) => {
+  //       setOnlineUsers(activeUsers);
+  //       console.log('socket-users',onlineUsers)
+  //     });
+  //   }, )
+    
 
-    socket.current = io('https://c541-154-160-21-5.ngrok-free.app');
-    socket.current.emit("new-user-add", id);
-    socket.current.on("get-users", (activeUsers) => {
-      setOnlineUsers(activeUsers);
-      console.log('socket-users',onlineUsers)
-    });
-
-    socket.current.on('new-order', (data)=> {
-      setMessage(data)
-      console.log('message', data)
-    });
+  //   socket.current.on('new-order', (data)=> {
+  //     setNotification(data)
+  //     console.log('message', data)
+  //   });
 
 
 
@@ -147,7 +143,7 @@ const registerPushToken = async ()=> {
           onPress={() => {
             !setModalVisible(); 
             setNotification(undefined); 
-            navigate("OrderDetailsScreen") 
+            navigate("OrderDetailsScreen", {orderDetails: notification}) 
           }}
           visible={modalVisible}
         />

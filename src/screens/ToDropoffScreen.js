@@ -1,21 +1,29 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import React, { useCallback, useMemo, useRef } from "react";
+import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { colors } from "../global/styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import ConfirmDropoffPopup from "../components/ConfirmDropoffPopup";
 
-const TopickupScreen = ({ navigation, route }) => {
-  const snapPoints = useMemo(() => ["45%", "75%"], []);
+const ToDropoffScreen = ({ navigation, route }) => {
+  const snapPoints = useMemo(() => ["50%", "75%"], []);
   const handleSheetChange = useCallback((index) => {}, []);
   const bottomSheetRef = useRef();
 
+  const [modalVisible, setModalVisible] = useState(false);
+
   return (
     <View style={styles.container}>
+      <ConfirmDropoffPopup
+        onPress={""}
+        visible={modalVisible}
+        close={() => setModalVisible(!modalVisible)}
+      />
       <View>
         <MapView
-          style={{ height: 500 }}
+          style={{ height: 700 }}
           provider={PROVIDER_GOOGLE}
           showsUserLocation={true}
           followsUserLocation={true}
@@ -40,10 +48,13 @@ const TopickupScreen = ({ navigation, route }) => {
             marginHorizontal: 25,
             marginBottom: 15,
             flexDirection: "row",
-            justifyContent: "space-between",
+            // justifyContent: "space-between",
             alignItems: "center",
           }}
         >
+          <Text style={{fontSize: 16, backgroundColor: 'green', padding:5, borderRadius: 60, width:40, textAlign: 'center', color: 'white', marginRight: 5 }}>
+            D
+          </Text>
           <Text style={{ color: colors.grey2, fontSize: 16 }}>
             To drop-off point
           </Text>
@@ -65,12 +76,12 @@ const TopickupScreen = ({ navigation, route }) => {
                 marginBottom: 5,
               }}
             >
-              Madina zongo, Adentan municipal - accra Ghana, adenta 
+              Madina zongo, Adenta municipality, adenta accra ghana
             </Text>
             <Text
               style={{ fontSize: 16, color: colors.grey2, textAlign: "center" }}
             >
-               Madina zongo, Adentan municipal - accra Ghana, adenta 
+               Madina zongo, Adenta municipality, adenta accra ghana
             </Text>
           </View>
           <View
@@ -80,48 +91,49 @@ const TopickupScreen = ({ navigation, route }) => {
               padding: 15,
               flexDirection: "row",
               justifyContent: "space-between",
-              width: '90%'
+              width: "90%",
             }}
           >
             <Ionicons
-              name="storefront-outline"
+              name="person-outline"
               color={colors.grey1}
               size={25}
             />
             <Text
               style={{ fontSize: 16, color: colors.grey2, textAlign: "center" }}
+              onPress={() => setModalVisible(true)}
             >
-              Mawuli Fusaini
+              Antwi Asante
             </Text>
-            <View style={{ flexDirection: "row"}}>
-              <Text style={{marginHorizontal:5, fontWeight:'bold'}}>1</Text>
+            <View style={{ flexDirection: "row" }}>
+              <Text style={{ marginHorizontal: 5, fontWeight: "bold" }}>1</Text>
               <Ionicons name="chevron-forward" color={colors.grey1} size={20} />
             </View>
           </View>
         </View>
-        <Pressable
+        <TouchableOpacity
           style={{
             borderRadius: 20,
             padding: 15,
-            // elevation: 2,
             marginVertical: 20,
             marginHorizontal: 20,
             backgroundColor: "#2196F3",
           }}
-          onPress={() => navigation.navigate("ConfirmPickupScreen")}
+          // onPress={() => navigation.navigate("ConfirmDropoffScreen")}
+          onPress={() => setModalVisible(true)}
         >
           <Text
             style={{ color: "white", fontWeight: "bold", textAlign: "center" }}
           >
-            I have arived at drop-off point
+            I have arived at Drop-off point
           </Text>
-        </Pressable>
+        </TouchableOpacity>
       </BottomSheet>
     </View>
   );
 };
 
-export default TopickupScreen;
+export default ToDropoffScreen;
 
 const styles = StyleSheet.create({
   container: {
