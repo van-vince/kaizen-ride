@@ -1,11 +1,7 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
-import HomeScreen from "./src/screens/HomeScreen";
+import { StyleSheet } from "react-native";
 import RootNavigator from "./src/navigation/RootNavigator";
-import OrderPopup from "./src/components/orderPopup";
-import { useContext, useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { AuthProvider,OrderContextProvider } from "./src/context/contexts";
+import { AuthProvider,OrderContextProvider, OrderDetailsContextProvider } from "./src/context/contexts";
 
 
 
@@ -16,7 +12,9 @@ export default function App() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <AuthProvider>
           <OrderContextProvider >
-          <RootNavigator />
+            <OrderDetailsContextProvider>
+              <RootNavigator />
+            </OrderDetailsContextProvider>
           </OrderContextProvider>
         </AuthProvider>
       </GestureHandlerRootView>

@@ -4,18 +4,18 @@ import {
   DestinationReducer,
   TravelTimeReducer,
   OrdersReducer,
-  ChargeReducer,
+  OrderDetailsReducer,
 } from "../reducers/reducers";
 import * as SecureStore from "expo-secure-store";
 import axios from "axios";
 import { Alert } from "react-native";
 
-export const OriginContext = createContext();
-export const DestinationContext = createContext();
-export const TravelTimeContext = createContext();
+// export const OriginContext = createContext();
+// export const DestinationContext = createContext();
+// export const TravelTimeContext = createContext();
 export const AuthContext = createContext();
 export const OrderContext = createContext()
-export const ChargeContext = createContext()
+export const OrderDetailsContext = createContext()
 
 // export const OriginContextProvider = (props) => {
 //   const [origin, dispatchOrigin] = useReducer(OriginReducer, {
@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }) => {
         if(res?.data.success ===true){
             let userInfo = res?.data;
             setUserInfo(userInfo);
-            console.log(userInfo)
+            // console.log(userInfo)
             setUserToken(userInfo?.courierToken);
             await SecureStore.setItemAsync("userInfo", JSON.stringify(userInfo));
             await SecureStore.setItemAsync("userToken", JSON.stringify(userInfo.courierToken));
@@ -170,14 +170,14 @@ export const OrderContextProvider = ({children}) => {
   )
 }
 
-// export const ChargeContextProvider = ({children}) => {
-//   const [charges, dispatchCharges] = useReducer(ChargeReducer, {
-//     charge: null,
-//   });
+export const OrderDetailsContextProvider = ({children}) => {
+  const [orderDetails, dispatchOrderDetails] = useReducer(OrderDetailsReducer, {
+    orderDetails: null,
+  });
 
-//   return (
-//     <ChargeContext.Provider value={{charges, dispatchCharges}} >
-//       {children}
-//     </ChargeContext.Provider>
-//   )
-// }
+  return (
+    <OrderDetailsContext.Provider value={{orderDetails, dispatchOrderDetails}} >
+      {children}
+    </OrderDetailsContext.Provider>
+  )
+}

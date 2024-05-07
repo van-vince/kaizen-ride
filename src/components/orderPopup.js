@@ -8,10 +8,8 @@ import {
   Modal,
 } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
-import { getStatusBarHeight } from "react-native-status-bar-height";
-import AntDesign from "react-native-vector-icons/AntDesign";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
-import { useNavigation } from "@react-navigation/native";
+
+
 
 const OrderPopup = ({ onPress, visible }) => {
   return (
@@ -52,9 +50,10 @@ const OrderPopup = ({ onPress, visible }) => {
             >
               <Feather
                 type="material-community"
-                name="alert-triangle"
+                name="alert-triangle" 
                 color='orange'
                 size={100}
+                onPress={onPress}
               />
             </View>
             <Pressable

@@ -4,17 +4,16 @@ import {
   StyleSheet,
   Text,
   View,
-  Dimensions,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import { colors } from "../global/styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { navigate } from "../navigation/OutNavigation";
 
-const ConfirmPickupPopup = ({ onPress, visible, close, }) => {
+const ConfirmPickupPopup = ({ onPress, visible, close, orderId, storeName, storeAddress, customerName, isloading }) => {
   return (
     <View style={styles.centeredView}>
       <Modal visible={visible} animationType="fade" transparent={true}>
@@ -35,7 +34,7 @@ const ConfirmPickupPopup = ({ onPress, visible, close, }) => {
                   paddingBottom: 10,
                 }}
               >
-                3454
+               {orderId}
               </Text>
               <MaterialCommunityIcons
                 name="arrow-collapse-all"
@@ -64,7 +63,7 @@ const ConfirmPickupPopup = ({ onPress, visible, close, }) => {
                   textAlign: "center",
                 }}
               >
-                Graceland Shito
+                {storeName}
               </Text>
             </View>
             <View
@@ -77,7 +76,7 @@ const ConfirmPickupPopup = ({ onPress, visible, close, }) => {
                 marginVertical: 20,
               }}
             >
-              <Text> Adoem public toilet, teshie adoemli accra, Ghana</Text>
+              <Text>{storeAddress}</Text>
             </View>
             <View
               style={{
@@ -95,11 +94,13 @@ const ConfirmPickupPopup = ({ onPress, visible, close, }) => {
                   textAlign: "center",
                 }}
               >
-                Gabriel Ansah
+                {customerName}
               </Text>
             </View>
             <TouchableOpacity
               style={{
+                flexDirection: 'row',
+                justifyContent: 'space-around',
                 borderRadius: 20,
                 padding: 15,
                 marginVertical: 20,
@@ -107,7 +108,7 @@ const ConfirmPickupPopup = ({ onPress, visible, close, }) => {
                 backgroundColor: "black",
               }}
               // onPress={() => navigation.navigate("ConfirmPickupScreen")}
-              onPress={() => navigate('ToDropoffScreen')}
+              onPress={onPress}
             >
               <Text
                 style={{
@@ -118,9 +119,10 @@ const ConfirmPickupPopup = ({ onPress, visible, close, }) => {
               >
                 Confirm Pick-up
               </Text>
+              {isloading && <ActivityIndicator size={"small"} />}
             </TouchableOpacity>
             <View>
-              <Text>Payment Details</Text>
+              <Text>At drop off loacation</Text>
             </View>
           </View>
         </View>

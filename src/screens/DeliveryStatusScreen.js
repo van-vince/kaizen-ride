@@ -1,11 +1,13 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useContext, useMemo, useRef } from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import { colors } from '../global/styles';
 import moment from "moment";
 import { Timeline } from "react-native-just-timeline";
+import { OrderContext } from "../context/contexts";
 
 const OrderDetailsScreen = ({ navigation, route }) => {
+
   const data = [
     // First row in the Timeline
     {
@@ -106,13 +108,22 @@ const OrderDetailsScreen = ({ navigation, route }) => {
     },
   ];
 
+
+  const { orders } = useContext(OrderContext)
+  const order = orders?.orders
+  const newOrder = order?.find((e) => e._id === orderId);
+  // console.log(newOrder.storeInfo[0])
+
+
   return (
     <View style={styles.container}>
-      <View style={{margin:20}}>
 
-      <Text>Order status</Text>
+      <View style={{marginBottom:20}}>
+      <Text style={{alignItems: 'center', padding:10, textAlign: 'center', fontWeight: 'bold', fontSize:20}} >Delivery status</Text>
       </View>
+
         <Timeline data={data} />
+
     </View>
   );
 };

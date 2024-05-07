@@ -1,23 +1,103 @@
-import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import { Alert, BackHandler, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { colors } from "../global/styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ConfirmPickupPopup from "../components/ConfirmPickupPopup";
+import { OrderContext, OrderDetailsContext } from "../context/contexts";
+import axios from 'axios';
+import { mapStyle } from "../global/mapStyle";
+import { navigate } from '../navigation/OutNavigation'
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const TopickupScreen = ({ navigation, route }) => {
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+const TopickupScreen = () => {
   const snapPoints = useMemo(() => ["50%", "75%"], []);
   const handleSheetChange = useCallback((index) => {}, []);
   const bottomSheetRef = useRef();
-
   const [modalVisible, setModalVisible] = useState(false);
+  const [isloading, setIsloading] =  useState(false)
+
+  const [orderDetails, setOrderDetails] = useState()
+
+  useEffect(() => {
+    const getData = async() => {
+     const data = await AsyncStorage.getItem('orderDetails')
+      const details = JSON.parse(data)
+      setOrderDetails(details)
+    }
+    getData()
+  }, [])
+  
+  
+  //  const {orderDetails} = useContext(OrderDetailsContext)
+   const storeAddress = orderDetails?.pickup
+   const customerAddress = orderDetails?.dropoff
+   const orderId = orderDetails?.orderId
+  //  console.log('details',orderDetails)
+
+  const { orders } = useContext(OrderContext)
+  const order = orders?.orders
+  const newOrder = order?.find((e) => e._id === orderId);
+  // console.log(newOrder?.storeInfo[0])
+
+
+
+  const confirmPickup = async() => {
+    setIsloading(true)
+    await axios
+    .patch(`${apiUrl}/orders/${orderId}`,
+    { updates:{
+      id: orderId,
+      text: "on-the-way",
+    }}
+    )
+    .then(async (res) => {
+      // console.log(res.data)
+      alert(res.data.message)
+      navigate('ToDropoffScreen')
+    })
+    .catch((err) => {
+      console.log("on the way", err);
+    });
+    setIsloading(false)
+  }
+
+    // Prevent back navigation
+    useEffect(() => {
+      const backAction = () => {
+        Alert.alert('Hold on!', 'Are you sure you want to go back?', [
+          {
+            text: 'Cancel',
+            onPress: () => null,
+            style: 'cancel',
+          },
+          {text: 'YES', onPress: () => navigate('HomeScreen')},
+        ]);
+        return true;
+      };
+  
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        backAction,
+      );
+  
+      return () => backHandler.remove();
+    }, []);
+
 
   return (
     <View style={styles.container}>
       <ConfirmPickupPopup
-        onPress={""}
+        onPress={confirmPickup}
+        orderId={newOrder?.id} 
+        storeName={newOrder?.storeInfo[0].name} 
+        storeAddress={storeAddress} 
+        customerName={newOrder?.customerInfo[0].name}
+        isloading={isloading}
         visible={modalVisible}
         close={() => setModalVisible(!modalVisible)}
       />
@@ -27,7 +107,7 @@ const TopickupScreen = ({ navigation, route }) => {
           provider={PROVIDER_GOOGLE}
           showsUserLocation={true}
           followsUserLocation={true}
-          // customMapStyle={mapStyle}
+          customMapStyle={mapStyle}
           initialRegion={{
             latitude: 5.614818,
             longitude: -0.186964,
@@ -46,7 +126,7 @@ const TopickupScreen = ({ navigation, route }) => {
         <View
           style={{
             marginHorizontal: 25,
-            marginBottom: 15,
+            marginBottom: 25,
             flexDirection: "row",
             // justifyContent: "space-around",
             alignItems: "center",
@@ -63,6 +143,7 @@ const TopickupScreen = ({ navigation, route }) => {
         <View
           style={{
             marginHorizontal: 25,
+            // flex: 1,
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -73,15 +154,15 @@ const TopickupScreen = ({ navigation, route }) => {
                 fontWeight: "bold",
                 fontSize: 16,
                 textAlign: "center",
-                marginBottom: 5,
+                marginBottom: 10,
               }}
             >
-              Adoem public toilet, teshie adoemli accra, Ghana
+              {storeAddress}
             </Text>
             <Text
-              style={{ fontSize: 16, color: colors.grey2, textAlign: "center" }}
+              style={{ fontSize: 16, marginBottom: 20, color: colors.grey2, textAlign: "center" }}
             >
-              Adoem public toilet, teshie adoemli accra, Ghana
+              {storeAddress}
             </Text>
           </View>
           <View
@@ -103,7 +184,7 @@ const TopickupScreen = ({ navigation, route }) => {
               style={{ fontSize: 16, color: colors.grey2, textAlign: "center" }}
               onPress={() => setModalVisible(true)}
             >
-              Graceland Shito
+              {newOrder?.storeInfo[0].name}
             </Text>
             <View style={{ flexDirection: "row" }}>
               <Text style={{ marginHorizontal: 5, fontWeight: "bold" }}>1</Text>
@@ -122,9 +203,7 @@ const TopickupScreen = ({ navigation, route }) => {
           // onPress={() => navigation.navigate("ConfirmPickupScreen")}
           onPress={() => setModalVisible(true)}
         >
-          <Text
-            style={{ color: "white", fontWeight: "bold", textAlign: "center" }}
-          >
+          <Text style={{ color: "white", fontWeight: "bold", textAlign: "center" }}>
             I have arived at pick-up point
           </Text>
         </TouchableOpacity>

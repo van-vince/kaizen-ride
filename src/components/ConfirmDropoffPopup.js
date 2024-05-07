@@ -6,6 +6,7 @@ import {
   View,
   Dimensions,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
@@ -13,9 +14,10 @@ import { colors } from "../global/styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
-import { navigate } from "../navigation/OutNavigation";
 
-const ConfirmDropoffPopup = ({ onPress, visible, close }) => {
+
+
+const ConfirmDropoffPopup = ({ onPress, visible, close, orderId, customerName, customerAddress, isloading }) => {
   return (
     <View style={styles.centeredView}>
       <Modal visible={visible} animationType="fade" transparent={true}>
@@ -36,7 +38,7 @@ const ConfirmDropoffPopup = ({ onPress, visible, close }) => {
                   paddingBottom: 10,
                 }}
               >
-                3454
+                {orderId}
               </Text>
               <MaterialCommunityIcons
                 name="arrow-collapse-all"
@@ -61,7 +63,7 @@ const ConfirmDropoffPopup = ({ onPress, visible, close }) => {
                   paddingRight: 20
                 }}
               >
-                Gabriel Ansah
+                {customerName}
               </Text>
               <Feather name="phone-call" color={colors.grey1} size={25} />
             </View>
@@ -75,7 +77,7 @@ const ConfirmDropoffPopup = ({ onPress, visible, close }) => {
                 marginVertical: 20,
               }}
             >
-              <Text> Adoem public toilet, teshie adoemli accra, Ghana</Text>
+              <Text>{customerAddress}</Text>
             </View>
             <View
               style={{
@@ -97,6 +99,8 @@ const ConfirmDropoffPopup = ({ onPress, visible, close }) => {
             </View>
             <TouchableOpacity
               style={{
+                flexDirection: 'row',
+              justifyContent: 'space-around',
                 borderRadius: 20,
                 padding: 15,
                 marginVertical: 20,
@@ -104,7 +108,7 @@ const ConfirmDropoffPopup = ({ onPress, visible, close }) => {
                 backgroundColor: "black",
               }}
               // onPress={() => navigation.navigate("ConfirmDropoffScreen")}
-              onPress={() => navigate('OrderStatusScreen')}
+              onPress={onPress}
             >
               <Text
                 style={{
@@ -115,6 +119,7 @@ const ConfirmDropoffPopup = ({ onPress, visible, close }) => {
               >
                 Confirm Drop-off
               </Text>
+              {isloading && <ActivityIndicator size={"small"} />}
             </TouchableOpacity>
             <View>
               <Text>At drop-off location</Text>

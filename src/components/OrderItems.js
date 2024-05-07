@@ -12,15 +12,7 @@ export default function OrderItem({photo, title, subTitle, dropOff, onPress}) {
       marginBottom: 10,
       borderRadius: 5,
       padding: 10,
-      // borderBottomWidth: 0.3,
-      // borderBottomColor: '#D8D8D8',
       shadowColor: "#000",
-      // shadowOffset: {
-      //   width: 5,
-      //   height: 1,
-      // },
-      // shadowOpacity: 0.25,
-      // shadowRadius: 10,
       elevation: 0.5,
 
     }}>

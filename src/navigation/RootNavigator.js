@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState, useRef} from 'react'
 import { ActivityIndicator, StyleSheet, Text, View, Platform } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import TabNavigator from './TabNavigator'
-import { AuthContext, OrderContext } from "../context/contexts";
+import { AuthContext, OrderContext, OrderDetailsContext } from "../context/contexts";
 import { AuthStack } from "./AuthStack";
 import OrderPopup from '../components/orderPopup'
 import  axios from "axios";
@@ -11,6 +11,8 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { io } from "socket.io-client";
 import { navigationRef, navigate } from './OutNavigation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+// import * as OutNavigation from './OutNavigation'
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -33,10 +35,7 @@ const RootNavigator = () => {
   );
 
   const [modalVisible, setModalVisible] = useState(true);
-  const [newOrder, setNewOder] = useState('');
   const [currentOrders, setCurrentOrders] = useState([]);
-  const [onlineUsers, setOnlineUsers] = useState([]);
-  // const socket = useRef();
 
   const { userInfo } = useContext(AuthContext);
   const courier = userInfo?.courier
@@ -44,6 +43,7 @@ const RootNavigator = () => {
   // console.log('orders', currentOrders)
 
   const { dispatchOrders } = useContext(OrderContext);
+  const { dispatchOrderDetails } = useContext(OrderDetailsContext);
 
   const orders = async () => {
     await axios
@@ -59,26 +59,45 @@ const RootNavigator = () => {
   };
 
   useEffect(() => {
-  orders()
-  }, [currentOrders])
+      orders()
+  }, [])
+
+
+  
   
 
   // Expo notifications
   const [expoPushToken, setExpoPushToken] = useState('');
-  const [notification, setNotification] = useState();
+  const [notification, setNotification] = useState(null);
   const notificationListener = useRef();
   const responseListener = useRef();
+  const [storage, setStorage] = useState()
+  console.log('store', storage)
+
+
+    useEffect(() => {
+        const store = async() => {
+            if(notification){
+              await AsyncStorage.setItem('orderDetails', JSON.stringify(notification));
+            }
+          const data = await AsyncStorage.getItem('orderDetails')
+          setStorage(data)
+        }
+        store()
+      },[notification])
+
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
 
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
       setNotification(notification?.request?.content.data);
+      // dispatchOrderDetails({ type: "ADD_ORDER_DETAILS", payload: { orderDetails: notification?.request?.content.data } });
       // console.log( 'note', notification?.request?.content.data)
     })
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      setNotification(notification);
+      // setNotification(response);
       // console.log(response);
     });
 
@@ -91,6 +110,7 @@ const RootNavigator = () => {
       }
     };
   }, []);
+
 
 const registerPushToken = async ()=> {
   if (expoPushToken) {

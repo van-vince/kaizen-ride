@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import OrdersScreen from '../screens/OrdersScreen';
-import EarningsScreen from '../screens/EarningsScreen';
+import HistoryScreen from '../screens/HistoryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -44,7 +44,7 @@ const TabNavigator = () => {
     />
     <Tab.Screen 
       name="History" 
-      component={EarningsScreen} 
+      component={HistoryScreen} 
       options = {{
         tabBarIcon: ({ color, size }) => (
           <Octicons name="history" color={color} size={size} />
