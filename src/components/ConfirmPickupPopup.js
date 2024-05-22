@@ -122,7 +122,7 @@ const ConfirmPickupPopup = ({ onPress, visible, close, orderId, storeName, store
               {isloading && <ActivityIndicator size={"small"} />}
             </TouchableOpacity>
             <View>
-              <Text>At drop off loacation</Text>
+              <Text>At pick up loacation</Text>
             </View>
           </View>
         </View>

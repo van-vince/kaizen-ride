@@ -24,6 +24,7 @@ import axios from "axios";
 import { AuthContext } from "../context/contexts";
 import { mapStyle } from "../global/mapStyle";
 import { navigate } from "../navigation/OutNavigation";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const GOOGLE_MAPS_APIKEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_APIKEY;
 
@@ -33,6 +34,7 @@ const OrderDetailsScreen = ({ navigation, route }) => {
   const snapPoints = useMemo(() => ["45%", "75%"], []);
   const handleSheetChange = useCallback((index) => {}, []);
   const bottomSheetRef = useRef();
+  const mapRef = useRef(null);
 
   const [storeLocation, setStoreLocation] = useState();
   const [customerLocation, setCustomerLocation] = useState();
@@ -46,6 +48,7 @@ const OrderDetailsScreen = ({ navigation, route }) => {
   const { orderDetails } = route.params;
   const storeAddress = orderDetails?.pickup;
   const customerAddress = orderDetails?.dropoff;
+  const orderNo = orderDetails?.orderNo
   const orderId = orderDetails.orderId || "660151b857ae1a9042d2ab1f";
   // console.log(storeLocation)
   // console.log(customerLocation)
@@ -74,6 +77,33 @@ const OrderDetailsScreen = ({ navigation, route }) => {
       .catch((err) => console.log(err));
   }, [orderDetails]);
 
+  // storing locations data in localStorage
+  useEffect(() => {
+    const latlng = async() => {
+        if(storeLocation && customerLocation){
+          let location = [storeLocation]
+          location.push(customerLocation) 
+          console.log('loc', location)
+          await AsyncStorage.setItem(`${orderNo}`, JSON.stringify(location));
+        }
+    }
+    latlng()
+  },[storeLocation])
+
+
+  useEffect(()=> {
+    setTimeout(()=>{
+      if(storeLocation?.lat !== null){
+        mapRef.current.fitToCoordinates(
+          [storeLocation, customerLocation],{
+            edgePadding:{top:50,right:50,left:50,bottom:50},
+            animated:true
+          }
+        )
+      }
+    },500)
+ },) 
+
   const acceptOrder = async () => {
     setIsloading(true);
     await axios
@@ -87,7 +117,7 @@ const OrderDetailsScreen = ({ navigation, route }) => {
       .then(async (res) => {
         // console.log(res.data)
         alert(res.data.message);
-        navigation.navigate("TopickupScreen");
+        navigation.navigate("TopickupScreen", {key: orderId});
       })
       .catch((err) => {
         console.log("acceptOrder", err);
@@ -116,7 +146,7 @@ const OrderDetailsScreen = ({ navigation, route }) => {
   // Prevent back navigation
   useEffect(() => {
     const backAction = () => {
-      Alert.alert("Hold on!", "Are you sure you want to go back?", [
+      Alert.alert("Hold on!", "Are you sure you want to go back? The order will be declined.", [
         {
           text: "Cancel",
           onPress: () => null,
@@ -143,7 +173,8 @@ const OrderDetailsScreen = ({ navigation, route }) => {
           provider={PROVIDER_GOOGLE}
           showsUserLocation={true}
           followsUserLocation={true}
-          customMapStyle={mapStyle}
+          // customMapStyle={mapStyle}
+          ref={mapRef}
           initialRegion={{
             latitude: 5.614818,
             longitude: -0.205874,

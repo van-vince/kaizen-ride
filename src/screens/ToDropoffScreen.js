@@ -1,7 +1,7 @@
-import { Alert, BackHandler, Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, BackHandler, Image, Linking, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, {Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { colors } from "../global/styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -11,23 +11,34 @@ import axios from 'axios';
 import { mapStyle } from "../global/mapStyle";
 import { navigate } from '../navigation/OutNavigation'
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import InfoPopup from "../components/InfoPopup";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-const ToDropoffScreen = () => {
+const ToDropoffScreen = ({route}) => {
   const snapPoints = useMemo(() => ["50%", "75%"], []);
   const handleSheetChange = useCallback((index) => {}, []);
   const bottomSheetRef = useRef();
   const [modalVisible, setModalVisible] = useState(false);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [isloading, setIsloading] =  useState(false)
 
   const [orderDetails, setOrderDetails] = useState()
+  const [locations, setLocations] = useState()
+
+  const params = route.params
+  const key = params.key
+  const orderNo = params.orderNo
+  // console.log(orderNo)
 
   useEffect(() => {
     const getData = async() => {
-     const data = await AsyncStorage.getItem('orderDetails')
+     const data = await AsyncStorage.getItem(`${key}`)
       const details = JSON.parse(data)
       setOrderDetails(details)
+      const locationData = await AsyncStorage.getItem(`${orderNo}`)
+      const location = JSON.parse(locationData)
+      setLocations(location)
     }
     getData()
   }, [])
@@ -41,8 +52,33 @@ const ToDropoffScreen = () => {
 
   const { orders } = useContext(OrderContext)
   const order = orders?.orders
-  const newOrder = order?.find((e) => e._id === orderId);
+  const newOrder = order?.find((e) => e._id === `${orderId}`);
   // console.log(newOrder.storeInfo[0])
+  const storeNo = newOrder?.storeInfo[0].contact
+  const customerNo = newOrder?.customerInfo[0].contact
+
+
+  dialCall = (number) => {
+    let phoneNumber = "";
+    if (Platform.OS === "android") {
+      phoneNumber = `tel:${number}`;
+    } else {
+      phoneNumber = `telprompt:${number}`;
+    }
+    Linking.openURL(phoneNumber);
+  };
+
+
+    // open navigation in google maps
+    function openMap() {
+      if(Platform.OS === 'ios'){
+        Linking.openURL(`maps://app?saddr=${locations[1]?.lat}+${locations[1]?.lng}&daddr=${parseFloat(locations[1]?.lat)}+${parseFloat(locations[1]?.lng)}`)
+      } else{
+       Linking.openURL(`google.navigation:q=${parseFloat(locations[1]?.lat)}+${parseFloat(locations[1]?.lng)}`)
+    }
+  
+  }
+
 
   const confirmDropoff = async() => {
     setIsloading(true)
@@ -55,7 +91,8 @@ const ToDropoffScreen = () => {
     )
     .then(async (res) => {
       console.log(res.data)
-      navigate('DeliveryStatusScreen')
+      // await AsyncStorage.removeItem(`${key}`)
+      navigate('DeliveryStatusScreen', {key: orderId})
     })
     .catch((err) => {
       console.log("delivered", err);
@@ -98,6 +135,12 @@ const ToDropoffScreen = () => {
         visible={modalVisible}
         close={() => setModalVisible(!modalVisible)}
       />
+      <InfoPopup
+      visible={infoModalVisible}
+      contactStore={() => dialCall(storeNo)}
+      contactCustomer={() => dialCall(customerNo)}
+      close={() => setInfoModalVisible(!infoModalVisible)}
+      />
       <View>
         <MapView
           style={{ height: 700 }}
@@ -111,7 +154,23 @@ const ToDropoffScreen = () => {
             latitudeDelta: 0.05,
             longitudeDelta: 0.021,
           }}
-        />
+        >
+         {locations != null && (
+            <Marker
+              coordinate={{
+                latitude: locations[1]?.lat,
+                longitude: locations[1]?.lng,
+              }}
+              title="Store location"
+            >
+              <Image
+                source={require("../../assets/maeker.png")}
+                style={{ height: 50, width: 50 }}
+                // resizeMode = 'cover'
+              />
+            </Marker>
+          )}
+        </MapView>
       </View>
 
       <BottomSheet
@@ -127,14 +186,22 @@ const ToDropoffScreen = () => {
             flexDirection: "row",
             // justifyContent: "space-between",
             alignItems: "center",
+            width: 'auto'
           }}
         >
-          <Text style={{fontSize: 16, backgroundColor: 'green', padding:5, borderRadius: 60, width:40, textAlign: 'center', color: 'white', marginRight: 5 }}>
-            D
+          <Text style={{fontSize: 16, backgroundColor: '#FFBF00', padding:5, borderRadius: 60, width:40, textAlign: 'center', color: 'white', marginRight: 5 }}>
+            B
           </Text>
           <Text style={{ color: colors.grey2, fontSize: 16 }}>
             To drop-off point
           </Text>
+          <Ionicons
+              name="ellipsis-vertical"
+              color={colors.grey1}
+              size={30}
+              style={{right:0, position: 'absolute'}}
+              onPress={() => setInfoModalVisible(true)}
+            />
         </View>
 
         <View
@@ -161,7 +228,7 @@ const ToDropoffScreen = () => {
                 {customerAddress}
             </Text>
           </View>
-          <View
+          <Pressable
             style={{
               borderRadius: 20,
               backgroundColor: colors.grey5,
@@ -170,6 +237,7 @@ const ToDropoffScreen = () => {
               justifyContent: "space-between",
               width: "90%",
             }}
+            onPress={() => openMap()}
           >
             <Ionicons
               name="person-outline"
@@ -178,7 +246,7 @@ const ToDropoffScreen = () => {
             />
             <Text
               style={{ fontSize: 16, color: colors.grey2, textAlign: "center" }}
-              onPress={() => setModalVisible(true)}
+            
             >
               {newOrder?.customerInfo[0].name}
             </Text>
@@ -186,7 +254,7 @@ const ToDropoffScreen = () => {
               <Text style={{ marginHorizontal: 5, fontWeight: "bold" }}>1</Text>
               <Ionicons name="chevron-forward" color={colors.grey1} size={20} />
             </View>
-          </View>
+          </Pressable>
         </View>
         <TouchableOpacity
           style={{

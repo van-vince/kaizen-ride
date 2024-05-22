@@ -1,17 +1,27 @@
-import React, {useContext, useEffect, useState, useRef} from 'react'
-import { ActivityIndicator, StyleSheet, Text, View, Platform } from 'react-native'
-import { NavigationContainer } from '@react-navigation/native'
-import TabNavigator from './TabNavigator'
-import { AuthContext, OrderContext, OrderDetailsContext } from "../context/contexts";
+import React, { useContext, useEffect, useState, useRef } from "react";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+  Platform,
+} from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import TabNavigator from "./TabNavigator";
+import {
+  AuthContext,
+  OrderContext,
+  OrderDetailsContext,
+} from "../context/contexts";
 import { AuthStack } from "./AuthStack";
-import OrderPopup from '../components/orderPopup'
-import  axios from "axios";
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
-import Constants from 'expo-constants';
+import OrderPopup from "../components/orderPopup";
+import axios from "axios";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import Constants from "expo-constants";
 import { io } from "socket.io-client";
-import { navigationRef, navigate } from './OutNavigation';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { navigationRef, navigate } from "./OutNavigation";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // import * as OutNavigation from './OutNavigation'
 
 Notifications.setNotificationHandler({
@@ -25,20 +35,21 @@ Notifications.setNotificationHandler({
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 const RootNavigator = () => {
-  const {isLoading, userToken} = useContext(AuthContext)
+  const { isLoading, userToken } = useContext(AuthContext);
 
   if (isLoading)
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <ActivityIndicator size={"large"} />
-    </View>
-  );
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Text>Loading your data...</Text>
+        <ActivityIndicator size={"large"} />
+      </View>
+    );
 
   const [modalVisible, setModalVisible] = useState(true);
   const [currentOrders, setCurrentOrders] = useState([]);
 
   const { userInfo } = useContext(AuthContext);
-  const courier = userInfo?.courier
+  const courier = userInfo?.courier;
   const id = courier?._id;
   // console.log('orders', currentOrders)
 
@@ -51,94 +62,94 @@ const RootNavigator = () => {
       .then(async (res) => {
         // console.log(res.data)
         setCurrentOrders(res.data.allOrders);
-        dispatchOrders({ type: "ADD_ORDERS", payload: { orders: res.data.allOrders } });
+        dispatchOrders({
+          type: "ADD_ORDERS",
+          payload: { orders: res.data.allOrders },
+        });
       })
       .catch((err) => {
-        console.log('orders', err);
+        console.log("orders", err);
+        alert('Something went wrong, reload the app')
       });
   };
 
   useEffect(() => {
-      orders()
-  }, [])
-
-
-  
-  
+    // setTimeout(()=> {
+      orders();
+    // }, 500)
+  }, []);
 
   // Expo notifications
-  const [expoPushToken, setExpoPushToken] = useState('');
+  const [expoPushToken, setExpoPushToken] = useState("");
   const [notification, setNotification] = useState(null);
   const notificationListener = useRef();
   const responseListener = useRef();
-  const [storage, setStorage] = useState()
-  console.log('store', storage)
-
-
-    useEffect(() => {
-        const store = async() => {
-            if(notification){
-              await AsyncStorage.setItem('orderDetails', JSON.stringify(notification));
-            }
-          const data = await AsyncStorage.getItem('orderDetails')
-          setStorage(data)
-        }
-        store()
-      },[notification])
-
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+    const store = async () => {
+      if (notification) {
+        const key = notification?.orderId;
+        // console.log('key', key)
+        await AsyncStorage.setItem(`${key}`, JSON.stringify(notification));
+      }
+    };
+    store();
+  }, [notification]);
 
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      setNotification(notification?.request?.content.data);
-      // dispatchOrderDetails({ type: "ADD_ORDER_DETAILS", payload: { orderDetails: notification?.request?.content.data } });
-      // console.log( 'note', notification?.request?.content.data)
-    })
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token) =>
+      setExpoPushToken(token)
+    );
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      // setNotification(response);
-      // console.log(response);
-    });
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification?.request?.content.data);
+        // dispatchOrderDetails({ type: "ADD_ORDER_DETAILS", payload: { orderDetails: notification?.request?.content.data } });
+        // console.log( 'note', notification?.request?.content.data)
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        // setNotification(response);
+        // console.log(response);
+      });
 
     return () => {
-      if(notificationListener.current) {
-        Notifications.removeNotificationSubscription(notificationListener.current);
+      if (notificationListener.current) {
+        Notifications.removeNotificationSubscription(
+          notificationListener.current
+        );
       }
-      if(responseListener.current){
+      if (responseListener.current) {
         Notifications.removeNotificationSubscription(responseListener.current);
       }
     };
   }, []);
 
+  const registerPushToken = async () => {
+    if (expoPushToken) {
+      await axios
+        .patch(`${apiUrl}/couriers/${id}`, { expoPushToken })
+        .then(async (res) => {
+          console.log(res.data);
+        })
+        .catch((err) => {
+          console.log("Pushtoken", err);
+        });
+    }
+    return;
+  };
 
-const registerPushToken = async ()=> {
-  if (expoPushToken) {
-    await axios
-      .patch(`${apiUrl}/couriers/${id}`,
-      {expoPushToken}
-      )
-      .then(async (res) => {
-        console.log(res.data)
-      })
-      .catch((err) => {
-        console.log("Pushtoken", err);
-      });
-  }
-  return
-}
-  
   useEffect(() => {
-  registerPushToken()
-  }, [expoPushToken])
-
+    registerPushToken();
+  }, [expoPushToken]);
 
   // Connect to Socket.io
   // const socket = io();
   // const [message, setMessage] = useState()
 
   // socket.current = io('https://e457-102-176-65-192.ngrok-free.app');
-    
+
   // useEffect(() => {
   //     socket.current.emit("new-user-add", id);
   //     socket.current.on("get-users", (activeUsers) => {
@@ -146,67 +157,69 @@ const registerPushToken = async ()=> {
   //       console.log('socket-users',onlineUsers)
   //     });
   //   }, )
-    
 
   //   socket.current.on('new-order', (data)=> {
   //     setNotification(data)
   //     console.log('message', data)
   //   });
 
-
-
   return (
-   < NavigationContainer ref={navigationRef}>
-     {userToken ?  <TabNavigator/> : <AuthStack />}
-     {notification && (
-       <OrderPopup
+    <NavigationContainer ref={navigationRef}>
+      {userToken ? <TabNavigator /> : <AuthStack />}
+      {notification && (
+        <OrderPopup
           onPress={() => {
-            !setModalVisible(); 
-            setNotification(undefined); 
-            navigate("OrderDetailsScreen", {orderDetails: notification}) 
+            !setModalVisible();
+            setNotification(undefined);
+            navigate("OrderDetailsScreen", { orderDetails: notification });
           }}
           visible={modalVisible}
         />
       )}
-   </ NavigationContainer>
-  )
-}
+    </NavigationContainer>
+  );
+};
 
 
 async function registerForPushNotificationsAsync() {
   let token;
 
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "default",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
+      lightColor: "#FF231F7C",
     });
   }
 
   if (Device.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
-    if (existingStatus !== 'granted') {
+    if (existingStatus !== "granted") {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    if (finalStatus !== 'granted') {
-      alert('Failed to get push token for push notification!');
+    if (finalStatus !== "granted") {
+      alert("Failed to get push token for push notification!");
       return;
     }
     // Learn more about projectId:
     // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
-    token = (await Notifications.getExpoPushTokenAsync({ projectId: Constants.expoConfig.extra.eas.projectId })).data;
+    token = (
+      await Notifications.getExpoPushTokenAsync({
+        projectId: Constants.expoConfig.extra.eas.projectId,
+      })
+    ).data;
     // console.log(token);
   } else {
-    alert('Must use physical device for Push Notifications');
+    alert("Must use physical device for Push Notifications");
   }
 
   return token;
 }
 
-export default RootNavigator
+export default RootNavigator;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});

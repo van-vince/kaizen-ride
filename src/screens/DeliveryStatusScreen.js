@@ -1,129 +1,66 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import React, { useCallback, useContext, useMemo, useRef } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import React, {
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
-import { colors } from '../global/styles';
-import moment from "moment";
 import { Timeline } from "react-native-just-timeline";
 import { OrderContext } from "../context/contexts";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const OrderDetailsScreen = ({ navigation, route }) => {
+const OrderDetailsScreen = ({route }) => {
+  const [orderDetails, setOrderDetails] = useState();
 
-  const data = [
-    // First row in the Timeline
-    {
-      title: {
-        content: "Event One Title",
-      },
-      description: {
-        content: "Event One Description",
-      },
-      time: {
-        content: moment().format("lll"),
-      },
-    },
+  const keys = route.params;
+  const key = keys.key
+  // console.log(key)
 
-    // Second row in the Timeline
-    {
-      title: {
-        content: "Event Two Title",
-      },
-      description: {
-        content: "Event Two Description",
-      },
-      time: {
-        content: moment().format("lll"),
-      },
-    },
+  useEffect(() => {
+    const getData = async () => {
+      const data = await AsyncStorage.getItem(`${key}`);
+      const details = JSON.parse(data);
+      setOrderDetails(details);
+    };
+    getData();
+  }, []);
 
-    // You got the idea..
-    {
-      title: {
-        content: "Event Three Title",
-      },
-      description: {
-        content: "Event Three Description",
-      },
-      time: {
-        content: moment().format("lll"),
-      },
-      icon: {
-        content: "pencil",
-      },
-    },
-    {
-      title: {
-        content: "Event Three Title",
-      },
-      description: {
-        content: "Event Three Description",
-      },
-      time: {
-        content: moment().format("lll"),
-      },
-      icon: {
-        content: "pencil",
-      },
-    },
-    {
-      title: {
-        content: "Event Three Title",
-      },
-      description: {
-        content: "Event Three Description",
-      },
-      time: {
-        content: moment().format("lll"),
-      },
-      icon: {
-        content: "pencil",
-      },
-    },
-    {
-      title: {
-        content: "Event Three Title",
-      },
-      description: {
-        content: "Event Three Description",
-      },
-      time: {
-        content: moment().format("lll"),
-      },
-      icon: {
-        content: "pencil",
-      },
-    },
-    {
-      title: {
-        content: "Event Three Title",
-      },
-      description: {
-        content: "Event Three Description",
-      },
-      time: {
-        content: moment().format("lll"),
-      },
-      icon: {
-        content: "pencil",
-      },
-    },
-  ];
+  const orderId = orderDetails?.orderId || key;
+  // console.log(orderDetails)
 
-
-  const { orders } = useContext(OrderContext)
-  const order = orders?.orders
+  const { orders } = useContext(OrderContext);
+  const order = orders?.orders;
   const newOrder = order?.find((e) => e._id === orderId);
-  // console.log(newOrder.storeInfo[0])
+  const newData = newOrder?.events[0].events
+
+  const data = [];
+    newData?.map((items) =>
+      data.push({
+        title: {content: `${items?.status}`},
+        description: {content:`${items?.desc || "Events description"}`},
+        time: {content: `${items?.date?.replace("T", "  ").substring(0, 17)}` },
+      })
+    );
 
 
   return (
     <View style={styles.container}>
-
-      <View style={{marginBottom:20}}>
-      <Text style={{alignItems: 'center', padding:10, textAlign: 'center', fontWeight: 'bold', fontSize:20}} >Delivery status</Text>
+      <View style={{ marginBottom: 10 }}>
+        <Text
+          style={{
+            alignItems: "center",
+            padding: 10,
+            textAlign: "center",
+            fontWeight: "bold",
+            fontSize: 20,
+            backgroundColor:'white',
+            width: '100%'
+          }}
+        >
+          Delivery status
+        </Text>
       </View>
-
-        <Timeline data={data} />
-
+      <Timeline data={data} style={{paddingHorizontal: 20}}/>
     </View>
   );
 };
@@ -132,9 +69,8 @@ export default OrderDetailsScreen;
 
 const styles = StyleSheet.create({
   container: {
-    // backgroundColor: 'white',
     flex: 1,
     paddingTop: getStatusBarHeight(),
-    paddingHorizontal: 20
+
   },
 });

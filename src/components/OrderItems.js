@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Image, TouchableOpacity, Dimensions} from 'react-native';
+import {View, Text, Image, TouchableOpacity, Dimensions, StyleSheet} from 'react-native';
 
 const windowWidth = Dimensions.get('window').width
 
@@ -9,11 +9,14 @@ export default function OrderItem({photo, title, subTitle, dropOff, onPress}) {
       flexDirection:'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 10,
+      marginBottom: 15,
       borderRadius: 5,
       padding: 10,
-      shadowColor: "#000",
-      elevation: 0.5,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.8,
+      shadowRadius: 2,  
+      elevation: 4
 
     }}>
       <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
@@ -66,3 +69,22 @@ export default function OrderItem({photo, title, subTitle, dropOff, onPress}) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  shadow: {  
+    borderColor:'yourchoice', // if you need 
+    borderWidth:1,
+    overflow: 'hidden',
+    shadowColor: 'yourchoice',
+    shadowRadius: 10,
+    shadowOpacity: 1,
+  },
+  boxWithShadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,  
+    elevation: 5
+}
+
+});

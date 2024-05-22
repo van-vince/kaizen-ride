@@ -5,6 +5,7 @@ import OrderDetailsScreen from '../screens/OrderDetailsScreen';
 import OrderStatusScreen from '../screens/DeliveryStatusScreen';
 import TopickupScreen from '../screens/TopickupScreen';
 import ToDropoffScreen from '../screens/ToDropoffScreen';
+import DeliveryStatusScreen from '../screens/DeliveryStatusScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -35,6 +36,11 @@ export function HomeStack(){
             <Stack.Screen 
                 name = 'ToDropoffScreen'
                 component = {ToDropoffScreen}
+                options = {{headerShown:false}}
+            />
+            <Stack.Screen 
+                name = 'DeliveryStatusScreen'
+                component = {DeliveryStatusScreen}
                 options = {{headerShown:false}}
             />
         </Stack.Navigator>

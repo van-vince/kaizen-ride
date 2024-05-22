@@ -4,10 +4,10 @@
     "slug": "kaizen-ride",
     "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/app-icon2.png",
+    "icon": "./assets/app-icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/app-icon2.png",
+      "image": "./assets/app-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -20,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/app-icon2.png",
+        "foregroundImage": "./assets/app-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.vanvince.kaizenride",
@@ -33,7 +33,7 @@
       "versionCode": 2
     },
     "web": {
-      "favicon": "./assets/app-icon2.png"
+      "favicon": "./assets/app-icon.png"
     },
     "extra": {
       "eas": {
@@ -50,7 +50,6 @@
       [
         "expo-notifications",
         {
-          // "icon": "./local/assets/notification-icon.png",
           "color": "#ffffff",
           "sounds": [
             "./assets/ambient.mp3",
@@ -63,7 +62,8 @@
         {
           "photosPermission": "Let this app access your photos."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "scheme": "com.vanvince.kaizenride"
   }

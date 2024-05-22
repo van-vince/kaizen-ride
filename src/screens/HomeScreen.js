@@ -9,16 +9,19 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { getStatusBarHeight } from "react-native-status-bar-height";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext,} from "react";
 import * as Location from "expo-location";
-import OrderPopup from "../components/orderPopup";
+import { AuthContext } from "../context/contexts";
 
-const SCREEN_HEIGHT = Dimensions.get("window").height;
-const SCREEN_WIDTH = Dimensions.get("window").width;
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 const HomeScreen = () => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  const { userInfo } = useContext(AuthContext);
+  const courier = userInfo?.courier;
+  const id = courier?._id;
 
   useEffect(() => {
     (async () => {
@@ -27,7 +30,6 @@ const HomeScreen = () => {
         setErrorMsg("Permission to access location was denied");
         return;
       }
-
       let location = await Location.getCurrentPositionAsync({});
       setLocation(location);
     })();
@@ -40,6 +42,26 @@ const HomeScreen = () => {
     text = JSON.stringify(location);
   }
   // console.log(text)
+
+  const checkIn = async() => {
+    setIsloading(true)
+    await axios
+    .patch(`${apiUrl}/courier/${id}`,
+    { updates:{
+      id: orderId,
+      text: "checkIn",
+    }}
+    )
+    .then(async (res) => {
+      // console.log(res.data)
+      alert(res.data.message)
+      // navigate('ToDropoffScreen', {key: orderId})
+    })
+    .catch((err) => {
+      console.log("on the way", err);
+    });
+    setIsloading(false)
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -79,8 +101,8 @@ const HomeScreen = () => {
         borderRadius: 10,
         width: '60%',
         elevation: 5
-
      }}
+     onPress={()=> checkIn()}
      >
         <Text style={{color: 'white', fontWeight:'bold', fontSize: 20}}>CHECK IN</Text>
      </TouchableOpacity>

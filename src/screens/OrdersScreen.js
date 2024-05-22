@@ -80,6 +80,7 @@ export default function OrdersScreen({ navigation }) {
               const assigned = item?.status.text === "Assigned"
               const onTheWay = item?.status.text === "On the way"
               const delivered = item?.status.text === "Delivered"
+
               return (
               <OrderItem
                 key={item.id}
@@ -89,12 +90,12 @@ export default function OrdersScreen({ navigation }) {
                 photo={require("../../assets/package33.png")}
                 onPress={() => {
                      assigned
-                    ? navigation.navigate("TopickupScreen")
+                    ? navigation.navigate("TopickupScreen", {key: item._id, orderNo: item.id})
                     : onTheWay
-                    ? navigation.navigate("ToDropoffScreen")
+                    ? navigation.navigate("ToDropoffScreen", {key: item._id, orderNo: item.id})
                     : delivered
-                    ? navigation.navigate("DeliveryStatusScreen")
-                    : navigation.navigate("DeliveryStatusScreen");
+                    ? navigation.navigate("DeliveryStatusScreen", {key: item._id, orderNo: item.id})
+                    : navigation.navigate("DeliveryStatusScreen", {key: item._id, orderNo: item.id});
                 }}
               />
               )})}

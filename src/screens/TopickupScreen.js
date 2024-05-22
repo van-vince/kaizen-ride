@@ -1,33 +1,45 @@
-import { Alert, BackHandler, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, BackHandler, Image, Linking, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { colors } from "../global/styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ConfirmPickupPopup from "../components/ConfirmPickupPopup";
-import { OrderContext, OrderDetailsContext } from "../context/contexts";
+import { OrderContext} from "../context/contexts";
 import axios from 'axios';
 import { mapStyle } from "../global/mapStyle";
 import { navigate } from '../navigation/OutNavigation'
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import InfoPopup from "../components/InfoPopup";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-const TopickupScreen = () => {
+const TopickupScreen = ({route}) => {
   const snapPoints = useMemo(() => ["50%", "75%"], []);
   const handleSheetChange = useCallback((index) => {}, []);
   const bottomSheetRef = useRef();
   const [modalVisible, setModalVisible] = useState(false);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [isloading, setIsloading] =  useState(false)
 
   const [orderDetails, setOrderDetails] = useState()
+  const [locations, setLocations] = useState()
+  // console.log(locations)
+
+  const params = route.params
+  const key = params.key
+  const orderNo = params.orderNo
+  // console.log(orderNo)
 
   useEffect(() => {
     const getData = async() => {
-     const data = await AsyncStorage.getItem('orderDetails')
+     const data = await AsyncStorage.getItem(`${key}`)
       const details = JSON.parse(data)
       setOrderDetails(details)
+      const locationData = await AsyncStorage.getItem(`${orderNo}`)
+      const location = JSON.parse(locationData)
+      setLocations(location)
     }
     getData()
   }, [])
@@ -37,13 +49,36 @@ const TopickupScreen = () => {
    const storeAddress = orderDetails?.pickup
    const customerAddress = orderDetails?.dropoff
    const orderId = orderDetails?.orderId
-  //  console.log('details',orderDetails)
+  //  console.log('details',orderId)
 
   const { orders } = useContext(OrderContext)
   const order = orders?.orders
-  const newOrder = order?.find((e) => e._id === orderId);
-  // console.log(newOrder?.storeInfo[0])
+  const newOrder = order?.find((e) => e._id === `${orderId}`);
+  // console.log(newOrder)
+  const storeNo = newOrder?.storeInfo[0].contact
+  const customerNo = newOrder?.customerInfo[0].contact
 
+
+  dialCall = (number) => {
+    let phoneNumber = "";
+    if (Platform.OS === "android") {
+      phoneNumber = `tel:${number}`;
+    } else {
+      phoneNumber = `telprompt:${number}`;
+    }
+    Linking.openURL(phoneNumber);
+  };
+
+
+  // open navigation in google maps
+  function openMap() {
+    if(Platform.OS === 'ios'){
+      Linking.openURL(`maps://app?saddr=${locations[0]?.lat}+${locations[0]?.lng}&daddr=${parseFloat(locations[0]?.lat)}+${parseFloat(locations[0]?.lng)}`)
+    } else{
+     Linking.openURL(`google.navigation:q=${parseFloat(locations[0]?.lat)}+${parseFloat(locations[0]?.lng)}`)
+  }
+
+}
 
 
   const confirmPickup = async() => {
@@ -58,7 +93,7 @@ const TopickupScreen = () => {
     .then(async (res) => {
       // console.log(res.data)
       alert(res.data.message)
-      navigate('ToDropoffScreen')
+      navigate('ToDropoffScreen', {key: orderId})
     })
     .catch((err) => {
       console.log("on the way", err);
@@ -101,6 +136,12 @@ const TopickupScreen = () => {
         visible={modalVisible}
         close={() => setModalVisible(!modalVisible)}
       />
+      <InfoPopup 
+      visible={infoModalVisible}
+      contactStore={() => dialCall(storeNo)}
+      contactCustomer={() => dialCall(customerNo)}
+      close={() => setInfoModalVisible(!infoModalVisible)}
+      />
       <View>
         <MapView
           style={{ height: 700 }}
@@ -114,7 +155,24 @@ const TopickupScreen = () => {
             latitudeDelta: 0.05,
             longitudeDelta: 0.021,
           }}
-        />
+        >
+          {locations != null && (
+            <Marker
+              coordinate={{
+                latitude: locations[0]?.lat,
+                longitude: locations[0]?.lng,
+              }}
+              title="Store location"
+            >
+              <Image
+                source={require("../../assets/marker2.png")}
+                style={{ height: 50, width: 50 }}
+                // resizeMode = 'cover'
+              />
+            </Marker>
+          )}
+        </MapView>
+
       </View>
 
       <BottomSheet
@@ -130,14 +188,22 @@ const TopickupScreen = () => {
             flexDirection: "row",
             // justifyContent: "space-around",
             alignItems: "center",
+            width: 'auto'
           }}
         >
-          <Text style={{fontSize: 16, backgroundColor: 'blue', padding:5, borderRadius: 60, width:40, textAlign: 'center', color: 'white', marginRight: 5 }}>
-            P
+          <Text style={{fontSize: 16, backgroundColor: '#00BFFF', padding:5, borderRadius: 60, width:40, textAlign: 'center', color: 'white', marginRight: 5 }}>
+            A
           </Text>
           <Text style={{ color: colors.grey2, fontSize: 16 }}>
             To pick-up point
           </Text>
+          <Ionicons
+              name="ellipsis-vertical"
+              color={colors.grey1}
+              size={30}
+              style={{right:0, position: 'absolute'}}
+              onPress={() => setInfoModalVisible(true)}
+            />
         </View>
 
         <View
@@ -165,7 +231,7 @@ const TopickupScreen = () => {
               {storeAddress}
             </Text>
           </View>
-          <View
+          <Pressable
             style={{
               borderRadius: 20,
               backgroundColor: colors.grey5,
@@ -174,6 +240,7 @@ const TopickupScreen = () => {
               justifyContent: "space-between",
               width: "90%",
             }}
+            onPress={() => openMap()}
           >
             <Ionicons
               name="storefront-outline"
@@ -182,7 +249,6 @@ const TopickupScreen = () => {
             />
             <Text
               style={{ fontSize: 16, color: colors.grey2, textAlign: "center" }}
-              onPress={() => setModalVisible(true)}
             >
               {newOrder?.storeInfo[0].name}
             </Text>
@@ -190,7 +256,7 @@ const TopickupScreen = () => {
               <Text style={{ marginHorizontal: 5, fontWeight: "bold" }}>1</Text>
               <Ionicons name="chevron-forward" color={colors.grey1} size={20} />
             </View>
-          </View>
+          </Pressable>
         </View>
         <TouchableOpacity
           style={{

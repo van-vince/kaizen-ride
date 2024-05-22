@@ -64,7 +64,7 @@ export default function HistoryScreen({ navigation }) {
             subTitle={item.createdAt.replace("T", "  ").substring(0, 17)}
             photo={require("../../assets/package33.png")}
             onPress={() => {
-              navigation.navigate("DeliveryStatusScreen", { id: item._id });
+              navigation.navigate("DeliveryStatusScreen", { key: item._id });
             }}
           />
         ))}
